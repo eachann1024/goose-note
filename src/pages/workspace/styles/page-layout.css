@@ -1,11 +1,14 @@
 /* Each pane owns its measure; explicit document and code formatting stay intact. */
 [data-page-layout] {
-  container: page-layout / inline-size;
   --page-layout-width: 800px;
   --page-layout-gutter: 48px;
   --page-layout-top: 80px;
   --page-paragraph-gap: 4px;
   --page-title-gap: 37px;
+}
+/* 预览含模拟侧栏，留白断点只看正文的可用宽度。 */
+[data-page-layout] .page-layout-body {
+  container: page-layout / inline-size;
 }
 [data-page-layout="full"] {
   --page-layout-width: none;

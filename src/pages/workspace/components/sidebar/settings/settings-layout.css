@@ -53,7 +53,6 @@
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
 }
-.settings-appearance-layout [data-page-layout="standard"] .page-layout-document { max-width: min(640px, 78%); }
 .settings-appearance-layout > [aria-label="编辑器即时预览"] {
   display: none;
   grid-column: 1;
