@@ -1,36 +1,27 @@
 import type { BlockNoteEditor } from "@blocknote/core";
-import { createToggleFrame, mergeParagraphs } from "@blocknote/core/blocks";
+import { createToggleWrapper, mergeParagraphs } from "@blocknote/core/blocks";
 import { DOMParser, Fragment, type Schema } from "prosemirror-model";
 import { readToggleCollapsed } from "../../core/toggleBlocks";
 
-/** 使用 BlockNote 原生结构/CSS，但展开状态随笔记保存，且所有 DOM 操作局限于此 frame。 */
-export function createPersistentToggleFrame(
+/** 使用 BlockNote 原生结构/CSS，但展开状态随笔记保存，且所有 DOM 操作局限于此 wrapper。 */
+export function createPersistentToggleWrapper(
   block: any,
   editor: BlockNoteEditor<any, any, any>,
+  contentDOM: HTMLElement,
 ) {
-  const frame = createToggleFrame(block, editor, {
-    get: (current) => !readToggleCollapsed(editor.getBlock(current.id) ?? block),
+  const wrapper = createToggleWrapper(block, editor, contentDOM, {
+    get: (current) => !readToggleCollapsed(current),
     set: (current, open) => {
-      const resolved = editor.getBlock(current.id);
-      if (!resolved || !editor.isEditable || readToggleCollapsed(resolved) === !open) return;
-      editor.updateBlock(resolved, { props: { collapsed: !open } });
+      if (!current || !editor.isEditable || readToggleCollapsed(current) === !open) return;
+      editor.updateBlock(current, { props: { collapsed: !open } });
     },
   });
-  const button = frame.dom.querySelector<HTMLButtonElement>(".bn-toggle-button");
+  const button = wrapper.dom.querySelector<HTMLButtonElement>(".bn-toggle-button");
   if (button) {
     button.setAttribute("aria-label", "展开或收起子块");
     button.setAttribute("aria-expanded", String(!readToggleCollapsed(block)));
   }
-  let renderedBlock = block;
-  return {
-    ...frame,
-    update(updated: typeof block) {
-      // Undo and external updates must also refresh the persisted fold state.
-      if (readToggleCollapsed(updated) !== readToggleCollapsed(renderedBlock)) return false;
-      renderedBlock = updated;
-      return frame.update(updated);
-    },
-  };
+  return wrapper;
 }
 
 /** details 的 summary 作为 inline，剩余节点作为真实 children，避免 HTML 导入拍平。 */

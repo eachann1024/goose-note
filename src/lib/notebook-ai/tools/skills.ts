@@ -1,7 +1,7 @@
-import { notebookAiAgentContextSchema } from "../toolContext";
 import { tool } from "ai";
 import { z } from "zod";
 import { NOTEBOOK_SKILLS, type NotebookSkillId } from "../skills";
+import type { NotebookAiAgentContext } from "../types";
 
 const skillIdSchema = z.enum([
   "createNoote",
@@ -18,13 +18,12 @@ const skillCatalog = skillIdSchema.options
   .join("；");
 
 export const loadSkill = tool({
-  contextSchema: notebookAiAgentContextSchema,
   description: `有明确任务时加载最匹配的 Skill。${skillCatalog}。`,
   inputSchema: z.object({
     skill: skillIdSchema.describe("要加载的 Skill"),
   }),
-  execute: async (input, { context: toolContext }) => {
-    const context = toolContext;
+  execute: async (input, { experimental_context }) => {
+    const context = experimental_context as NotebookAiAgentContext;
     const skillId = input.skill as NotebookSkillId;
     context.loadedSkills.add(skillId);
     const skill = NOTEBOOK_SKILLS[skillId];

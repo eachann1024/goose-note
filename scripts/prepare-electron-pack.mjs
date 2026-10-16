@@ -21,6 +21,11 @@ try {
   throw new Error(`Failed to parse root package.json: ${err.message}`);
 }
 
+// Use the exact installed version, including lockfile resolutions, for release packaging.
+const electronVersion = JSON.parse(
+  readFileSync(resolve(root, "node_modules/electron/package.json"), "utf8"),
+).version;
+
 // Linux 包要求邮箱格式；默认使用非联系地址占位，不向公开作者字段补入私人邮箱。
 const linuxMaintainer =
   process.env.LINUX_MAINTAINER ||
@@ -107,7 +112,7 @@ directories:
   output: ../packaged
 asar: true
 npmRebuild: false
-electronVersion: ${JSON.parse(readFileSync(resolve(root, "node_modules/electron/package.json"), "utf8")).version}
+electronVersion: ${electronVersion}
 compression: maximum
 # mac 上 Chromium 语言包是 zh_CN.lproj（下划线）。必须带 zh_CN，否则 zh-CN 匹配不到。
 electronLanguages:

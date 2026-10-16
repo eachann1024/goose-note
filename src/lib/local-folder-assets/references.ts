@@ -148,12 +148,11 @@ export function extractAssetReferencesFromMarkdown(
 ): LocalAssetReferenceIndex {
   if (!markdown) return index;
 
-  const visitTokens = (tokens: ReturnType<typeof markdownParser.parse>) => {
+  const visitTokens = (tokens: ReturnType<MarkdownIt["parse"]>) => {
     for (const token of tokens) {
       for (const attr of ["src", "href"]) {
         const destination = token.attrGet(attr);
-        if (typeof destination === "string" && destination)
-          addReference(destination, pagePath, basePath, index);
+        if (destination) addReference(destination, pagePath, basePath, index);
       }
       if (token.children) visitTokens(token.children);
     }

@@ -159,7 +159,7 @@ async function runSdkTool(
       toolCallId,
       messages: [],
       abortSignal: signal,
-      context: agentContext,
+      experimental_context: agentContext,
     } as never,
   );
 
@@ -184,9 +184,7 @@ export function buildPiDomainTools(
     return {
       name,
       label: TOOL_LABELS[name],
-      description: typeof sdkTool.description === "function"
-        ? sdkTool.description({ context: agentContext })
-        : sdkTool.description ?? name,
+      description: sdkTool.description ?? name,
       parameters,
       execute: async (toolCallId, params, signal) =>
         runSdkTool(

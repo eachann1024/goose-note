@@ -44,7 +44,7 @@ export function UserMessage({
         <div className="notebook-ai-message-text notebook-ai-user-bubble min-w-0 max-w-full space-y-2 rounded-[14px] rounded-tr-[4px] px-3 py-2 text-sm text-foreground leading-relaxed">
           <MessagePrimitive.Attachments>
             {({ attachment }) => {
-              const imagePart = attachment.content?.find(
+              const imagePart = attachment.content.find(
                 (part) => part.type === "image",
               );
               return (

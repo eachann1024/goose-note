@@ -1,7 +1,5 @@
 import type {
   Message,
-  JsonObject,
-  JsonValue,
   TextContent,
   ImageContent,
   ToolCall,
@@ -154,7 +152,7 @@ export function uiMessagesToAgentMessages(
           type: "toolCall",
           id: toolCallId,
           name: toolName,
-          arguments: JSON.parse(JSON.stringify(input)) as JsonObject,
+          arguments: input as Record<string, unknown>,
         });
 
         const state = part.state ?? "";
@@ -181,7 +179,7 @@ export function uiMessagesToAgentMessages(
                     : JSON.stringify(details ?? null),
               },
             ],
-            details: JSON.parse(JSON.stringify(details ?? null)) as JsonValue,
+            details,
             isError,
             timestamp: Date.now(),
           });

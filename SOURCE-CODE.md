@@ -9,7 +9,7 @@ https://github.com/eachann1024/goose-note
 
 ## 构建
 
-使用 package.json 指定的 Bun 版本和 `.nvmrc` 指定的 Node.js 26.12.0 或以上版本。
+使用 package.json 指定的 Bun 版本和 Node.js 20 或以上。
 
 ```bash
 bun install --frozen-lockfile

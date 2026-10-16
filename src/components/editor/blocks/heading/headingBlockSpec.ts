@@ -10,7 +10,7 @@ import {
   parseDefaultProps,
 } from "@blocknote/core/blocks";
 import {
-  createPersistentToggleFrame,
+  createPersistentToggleWrapper,
   createToggleExternalHTML,
   parseToggleDetailsContent,
 } from "../toggle/toggleBlockHelpers";
@@ -91,15 +91,13 @@ export const createGooseHeadingBlockSpec = createBlockSpec(
     runsBefore: ["toggleListItem"],
     render(block, editor) {
       const dom = document.createElement(`h${block.props.level}`);
+      if (block.props.isToggleable) {
+        return { ...createPersistentToggleWrapper(block, editor, dom), contentDOM: dom };
+      }
       if (block.props.collapsed === true) {
         dom.setAttribute("data-collapsed", "true");
       }
       return { dom, contentDOM: dom };
-    },
-    renderFrame(block, editor) {
-      return block.props.isToggleable
-        ? createPersistentToggleFrame(block, editor)
-        : undefined;
     },
     toExternalHTML(block) {
       const dom = document.createElement(`h${block.props.level}`);

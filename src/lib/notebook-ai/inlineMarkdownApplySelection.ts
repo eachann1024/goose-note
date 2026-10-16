@@ -44,7 +44,8 @@ export function capturePrivateInlineTarget(editor: Editor, blockId: string): Pri
     const selected = part.node.copy(Fragment.from(part.node.firstChild!.copy(
       part.node.firstChild!.content.cut(part.offsetFrom, part.offsetTo),
     )));
-    const block = nodeToBlock(selected, doc);
+    const block = nodeToBlock(selected, editor.prosemirrorState.schema, editor.schema.blockSchema,
+      editor.schema.inlineContentSchema, editor.schema.styleSchema);
     return { ...part, oldMarkdown: serializeBlocksToMarkdown(editor, [block]) };
   });
   const first = parts[0];

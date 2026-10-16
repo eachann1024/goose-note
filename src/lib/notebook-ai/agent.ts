@@ -77,14 +77,7 @@ export function buildNotebookAgent(
     // executeBatchPlan 已经返回本地审批卡；不要再让模型看到该结果后继续一轮。
     // hasToolCall 在本步工具执行完成后才检查，因此不会阻止冻结计划的生成。
     stopWhen: [hasToolCall("executeBatchPlan"), stepCountIs(16)],
-    toolsContext: {
-      loadSkill: agentContext,
-      listNotebooks: agentContext,
-      listPages: agentContext,
-      searchNotes: agentContext,
-      readPage: agentContext,
-      executeBatchPlan: agentContext,
-    },
+    experimental_context: agentContext,
     prepareStep: () => {
       const activeTools = [
         "loadSkill",

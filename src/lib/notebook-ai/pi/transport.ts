@@ -35,7 +35,6 @@ export function buildPiTransport(
   }
 
   const { agent, abort, restoreLoadedSkills } = agentBuild;
-  const initialSystemMessages = agent.state.messages.filter((message) => message.role === "system");
 
   const transport: ChatTransport<NotebookAiMessage> = {
     async sendMessages({ messages, abortSignal }) {
@@ -47,7 +46,7 @@ export function buildPiTransport(
       // 历史不含最后一条 user（由 agent.prompt 注入）
       const history = messages.slice(0, -1);
       restoreLoadedSkills(collectLoadedSkillIds(history));
-      agent.state.messages = [...initialSystemMessages, ...uiMessagesToAgentMessages(history)];
+      agent.state.messages = uiMessagesToAgentMessages(history);
 
       const stream = createUIMessageStream<NotebookAiMessage>({
         execute: async ({ writer }) => {

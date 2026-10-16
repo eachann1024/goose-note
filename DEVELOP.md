@@ -4,7 +4,7 @@
 
 ## 开发与检查
 
-使用 `package.json` 指定的 Bun 版本；Node.js 使用 `.nvmrc` 指定的 26.12.0 或以上版本。
+使用 `package.json` 指定的 Bun 版本；Node.js 需要 20 或以上。
 
 ```bash
 git clone https://github.com/eachann1024/goose-note.git
@@ -13,10 +13,6 @@ bun install --frozen-lockfile
 bun run dev          # 浏览器开发，端口 6001
 bun run typecheck
 ```
-
-TypeScript 类型检查使用原生编译器 7.0.2（`@typescript/native` 别名提供 `tsc`）。最新版 `typescript-eslint` 尚不支持 TypeScript 7 的编译器 API，因此 `typescript` 别名指向官方 `@typescript/typescript6` 兼容包，仅供 ESLint 使用；不要把 `typecheck` 改为 `tsc6`。并行安装方式见 [TypeScript 官方迁移说明](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/#running-side-by-side-with-typescript-6.0)。自动导入声明扫描使用 Oxc，不依赖旧编译器 API。
-
-Electron 打包版本从已安装依赖读取；Electron 44.8.0 内置 Node.js 24.22.0，主进程和 preload 使用 `node24` 编译目标，开发/CI 的 Node.js 版本独立由 `.nvmrc` 指定。
 
 `package.json` 只保留 `dev`、`linux`、`mac`、`window`、`typecheck` 五个入口。`typecheck` 用于静态排错，不是产品验收标准，也不代替界面操作。
 

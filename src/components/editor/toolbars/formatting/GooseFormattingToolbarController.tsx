@@ -3,7 +3,6 @@ import { FormattingToolbarExtension } from "@blocknote/core/extensions";
 import { flip, offset, shift } from "@floating-ui/react";
 import {
   GenericPopover,
-  PortalElementOverride,
   useBlockNoteEditor,
   useExtension,
   useExtensionState,
@@ -22,7 +21,7 @@ import { OverlayLayerProvider, useOverlayLayer } from "@/components/ui/overlay-l
 type GooseFormattingToolbarControllerProps = {
   formattingToolbar: FC<FormattingToolbarProps>;
   floatingUIOptions?: FloatingUIOptions;
-  portalElement?: HTMLElement;
+  portalElement?: HTMLElement | null;
   /**
    * Optional external gate. When set and floatingUIOptions does not define
    * `useFloatingOptions.open`, show = store && open.
@@ -136,11 +135,13 @@ export function GooseFormattingToolbarController({
 
   return (
     <OverlayLayerProvider layer={layer}>
-      <PortalElementOverride target={portalElement}>
-        <GenericPopover reference={reference} {...floatingUIOptions}>
-          {show ? <Component /> : null}
-        </GenericPopover>
-      </PortalElementOverride>
+    <GenericPopover
+      reference={reference}
+      portalElement={portalElement}
+      {...floatingUIOptions}
+    >
+      {show ? <Component /> : null}
+    </GenericPopover>
     </OverlayLayerProvider>
   );
 }

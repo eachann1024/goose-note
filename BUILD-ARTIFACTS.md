@@ -28,7 +28,7 @@ Arch 指 Linux 发行版，Omarchy（Arch + Hyprland）同样使用 `.pacman` �
 
 ## 复现
 
-使用对应操作系统、Node.js 26.12.0（见 `.nvmrc`）、Bun 1.4.3（见 `package.json`）。Linux 安装 `libarchive-tools`（pacman 包）；macOS 安装 Xcode Command Line Tools。
+使用对应操作系统、Node.js 22、Bun 1.3.14。Linux 安装 `libarchive-tools`（pacman 包）；macOS 安装 Xcode Command Line Tools。
 
 ```sh
 bun install --frozen-lockfile
