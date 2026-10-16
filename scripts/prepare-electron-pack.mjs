@@ -107,7 +107,7 @@ directories:
   output: ../packaged
 asar: true
 npmRebuild: false
-electronVersion: 44.0.0
+electronVersion: ${JSON.parse(readFileSync(resolve(root, "node_modules/electron/package.json"), "utf8")).version}
 compression: maximum
 # mac 上 Chromium 语言包是 zh_CN.lproj（下划线）。必须带 zh_CN，否则 zh-CN 匹配不到。
 electronLanguages:

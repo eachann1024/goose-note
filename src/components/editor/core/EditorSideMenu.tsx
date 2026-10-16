@@ -1,7 +1,7 @@
 import { EditorAction } from "@/components/editor/ui/button";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useBlockNoteEditor, useExtension } from "@blocknote/react";
+import { useBlockNoteEditor, useExtension, usePortalElement } from "@blocknote/react";
 import { SideMenuExtension } from "@blocknote/core/extensions";
 import { Plus, GripVertical, ChevronRight } from "@/components/ui/icons";
 import { cn } from "@/components/editor/utils/cn";
@@ -27,6 +27,7 @@ const altKeyLabel = isMac ? "⌥" : "Alt";
 export function EditorSideMenu() {
   const editor = useBlockNoteEditor<any, any, any>();
   const sideMenu = useExtension(SideMenuExtension);
+  const ambientPortal = usePortalElement();
   const menuRef = useRef<HTMLDivElement>(null);
   const pressedHandle = useRef(false);
   const [addTipOpen, setAddTipOpen] = useState(false);
@@ -133,7 +134,7 @@ export function EditorSideMenu() {
     ".workspace-main-sheet",
   )
     ? document.body
-    : (editor.portalElement ?? document.body);
+    : (ambientPortal ?? document.body);
   return createPortal(
     <div
       ref={menuRef}

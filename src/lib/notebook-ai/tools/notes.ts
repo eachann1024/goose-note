@@ -1,3 +1,4 @@
+import { notebookAiAgentContextSchema } from "../toolContext";
 import { tool } from "ai";
 import { z } from "zod";
 import { usePages } from "@/stores/usePages";
@@ -6,17 +7,17 @@ import { getPageTitle } from "@/components/editor/utils/page-title";
 import { getContentDerivationsForPage } from "@/components/editor/utils/content-page-derivations-cache";
 import { blocksToMarkdown } from "@/lib/export/blocknoteSerializer";
 import type { BlockNoteContent } from "@/components/editor/utils/blocknote-content";
-import type { NotebookAiAgentContext } from "../types";
 
 // ----------------------------------------------------------------
 // listNotebooks
 // ----------------------------------------------------------------
 export const listNotebooks = tool({
+  contextSchema: notebookAiAgentContextSchema,
   description: "返回当前绑定笔记本。AI 不可访问其他笔记本。",
   inputSchema: z.object({}),
-  execute: async (_input, { experimental_context }) => {
+  execute: async (_input, { context: toolContext }) => {
     const { notebookId: currentNotebookId } =
-      experimental_context as NotebookAiAgentContext;
+      toolContext;
     const notebooks = useNotebooks.getState().notebooks;
     const notebook = notebooks[currentNotebookId];
     return notebook
@@ -29,6 +30,7 @@ export const listNotebooks = tool({
 // listPages
 // ----------------------------------------------------------------
 export const listPages = tool({
+  contextSchema: notebookAiAgentContextSchema,
   description:
     "列出指定笔记本（默认为当前绑定笔记本）中所有未删除的页面，返回页面 id、标题和最近更新时间。",
   inputSchema: z.object({
@@ -37,9 +39,9 @@ export const listPages = tool({
       .optional()
       .describe("指定笔记本 id；省略则使用当前绑定笔记本"),
   }),
-  execute: async (input, { experimental_context }) => {
+  execute: async (input, { context: toolContext }) => {
     const { notebookId: boundNotebookId } =
-      experimental_context as NotebookAiAgentContext;
+      toolContext;
     const targetId = input.notebookId ?? boundNotebookId;
     if (targetId !== boundNotebookId) {
       return { error: "AI 只能访问当前绑定笔记本" };
@@ -62,14 +64,15 @@ export const listPages = tool({
 // searchNotes
 // ----------------------------------------------------------------
 export const searchNotes = tool({
+  contextSchema: notebookAiAgentContextSchema,
   description:
     "在当前绑定笔记本中全文搜索。仅用于跨页面查找或目标页面不明确的任务；当前页编辑、润色、总结、删除区块时不要调用。返回匹配页面和命中片段。",
   inputSchema: z.object({
     query: z.string().optional().default("").describe("搜索关键词"),
   }),
-  execute: async (input, { experimental_context }) => {
+  execute: async (input, { context: toolContext }) => {
     const { notebookId: boundNotebookId } =
-      experimental_context as NotebookAiAgentContext;
+      toolContext;
     const query = input.query.trim();
     if (!query) return [];
 
@@ -173,14 +176,15 @@ export const searchNotes = tool({
 // readPage
 // ----------------------------------------------------------------
 export const readPage = tool({
+  contextSchema: notebookAiAgentContextSchema,
   description:
     "读取页面完整内容，返回标题和 Markdown 格式正文。当前页任务可省略 pageId，默认读取当前打开页面。",
   inputSchema: z.object({
     pageId: z.string().optional().describe("页面 id；省略则读取当前打开页面"),
   }),
-  execute: async (input, { experimental_context }) => {
+  execute: async (input, { context: toolContext }) => {
     const { currentPageId, notebookId } =
-      experimental_context as NotebookAiAgentContext;
+      toolContext;
     const pageId =
       input.pageId ?? currentPageId ?? usePages.getState().activePageId ?? "";
     const page = usePages.getState().pages[pageId];

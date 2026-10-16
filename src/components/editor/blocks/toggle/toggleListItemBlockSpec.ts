@@ -1,7 +1,7 @@
 import { createBlockConfig, createBlockSpec, defaultProps } from "@blocknote/core";
 import { addDefaultPropsExternalHTML, parseDefaultProps } from "@blocknote/core/blocks";
 import {
-  createPersistentToggleWrapper,
+  createPersistentToggleFrame,
   createToggleExternalHTML,
   parseToggleDetailsContent,
 } from "./toggleBlockHelpers";
@@ -26,10 +26,11 @@ export const gooseToggleListItemBlockSpec = createBlockSpec(toggleConfig, {
     return details ? parseToggleDetailsContent(details as HTMLElement, schema, "toggleListItem") : undefined;
   },
   runsBefore: ["bulletListItem"],
-  render(block, editor) {
+  render() {
     const contentDOM = document.createElement("p");
-    return { ...createPersistentToggleWrapper(block, editor, contentDOM), contentDOM };
+    return { dom: contentDOM, contentDOM };
   },
+  renderFrame: createPersistentToggleFrame,
   toExternalHTML(block) {
     const contentDOM = document.createElement("p");
     addDefaultPropsExternalHTML(block.props, contentDOM);

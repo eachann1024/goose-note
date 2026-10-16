@@ -1,9 +1,9 @@
 import path from "node:path";
 import type { Plugin, PluginOption } from "vite";
 import AutoImport from "unplugin-auto-import/vite";
-import { autoImportEntries } from "./autoImportEntries";
-import { autoImportPackages } from "./autoImportPackages";
-import { generateAutoImportDeclarations } from "./autoImportDeclarations";
+import { autoImportEntries } from "./autoImportEntries.ts";
+import { autoImportPackages } from "./autoImportPackages.ts";
+import { generateAutoImportDeclarations } from "./autoImportDeclarations.ts";
 
 function createDeclarationPlugin(): Plugin {
   let root = process.cwd();

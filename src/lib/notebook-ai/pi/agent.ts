@@ -99,14 +99,14 @@ export function buildPiNotebookAgent(
     prepareNextTurnWithContext: async (
       turnContext,
     ): Promise<AgentLoopTurnUpdate | undefined> => {
-      // 只刷新 systemPrompt / tools，绝不替换 messages，避免 DeepSeek 等
-      // 出现 Duplicate call_id（重复注入 tool 历史）。
+      // Pi 1.x 从 system 消息读取提示词；只更新首条提示，不重放工具历史。
       return {
         context: {
           ...turnContext.context,
-          systemPrompt: buildSystemPrompt(
-            notebookId,
-            agentContext.currentPageId,
+          messages: turnContext.context.messages.map((message, index) =>
+            index === 0 && message.role === "system"
+              ? { ...message, content: buildSystemPrompt(notebookId, agentContext.currentPageId) }
+              : message,
           ),
           tools: getActivePiTools(allTools, agentContext),
         },

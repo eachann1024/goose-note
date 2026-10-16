@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type FC } from "react";
 import {
   BlockPopover,
   PositionPopover,
+  PortalElementOverride,
   useBlockNoteEditor,
   useExtension,
   useExtensionState,
@@ -227,21 +228,17 @@ export function GooseAIMenuController({
     </div>
   ) : null;
 
-  if (selection) {
-    return (
-      <PositionPopover
-        position={selection}
-        portalElement={null}
-        {...floatingUIOptions}
-      >
-        {content}
-      </PositionPopover>
-    );
-  }
-
   return (
-    <BlockPopover blockId={blockId} portalElement={null} {...floatingUIOptions}>
-      {content}
-    </BlockPopover>
+    <PortalElementOverride target={document.body}>
+      {selection ? (
+        <PositionPopover position={selection} {...floatingUIOptions}>
+          {content}
+        </PositionPopover>
+      ) : (
+        <BlockPopover blockId={blockId} {...floatingUIOptions}>
+          {content}
+        </BlockPopover>
+      )}
+    </PortalElementOverride>
   );
 }

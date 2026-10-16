@@ -53,7 +53,7 @@ export type NotebookAiMessage = UIMessage<
   InferUITools<NotebookAiTools>
 >;
 
-export interface NotebookAiAgentContext {
+export type NotebookAiAgentContext = {
   notebookId: string;
   currentPageId?: string | null;
   loadedSkills: Set<NotebookSkillId>;

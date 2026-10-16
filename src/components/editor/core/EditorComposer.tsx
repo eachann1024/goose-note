@@ -122,7 +122,7 @@ export function EditorComposer({
     [],
   );
   // 选区工具栏一出现就可见。链接工具栏 hover 等 150ms 再出现，减少划过误开；
-  // 移出立即收起。挂到 document（portalElement=null），用 --editor-ui-scale
+  // 移出立即收起。挂到 document（portalElement=document.body），用 --editor-ui-scale
   // 写真实尺寸，避免 CSS zoom 在放大缩小后和图标对不齐。
   const linkToolbarFloatingOptions = useMemo<FloatingUIOptions>(
     () => ({
@@ -196,13 +196,13 @@ export function EditorComposer({
             <GooseFormattingToolbarController
               formattingToolbar={EditorFormattingToolbar}
               floatingUIOptions={formattingToolbarFloatingOptions}
-              portalElement={null}
+              portalElement={document.body}
             />
           )}
         </FormattingToolbarHoldContext.Provider>
         <LinkToolbarController
           linkToolbar={EditorLinkToolbar}
-          portalElement={null}
+          portalElement={document.body}
           floatingUIOptions={linkToolbarFloatingOptions}
         />
         {editable ? <FilePanelController filePanel={EditorFilePanel} /> : null}

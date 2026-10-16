@@ -346,5 +346,59 @@
     "version": "0.1.0",
     "repository": "https://github.com/NaturalIntelligence/xml-naming",
     "error": "No verified repository and gitHead"
+  },
+  {
+    "name": "@ai-sdk/provider-utils",
+    "version": "5.0.61",
+    "repository": "https://github.com/vercel/ai",
+    "file": "ai-sdk-provider-utils-5.0.61.txt",
+    "source": "https://github.com/vercel/ai/blob/main/LICENSE",
+    "upstreamLicenseBlob": "6c16c29f41168411dbf6e3ba3a063ce789c27334",
+    "verification": "Current upstream license; npm package declares the same SPDX license. Exact published-version notice still to verify before release."
+  },
+  {
+    "name": "@aws-sdk/credential-provider-http",
+    "version": "3.972.76",
+    "repository": "https://github.com/aws/aws-sdk-js-v3",
+    "file": "aws-sdk-credential-provider-http-3.972.76.txt",
+    "source": "https://github.com/aws/aws-sdk-js-v3/blob/main/LICENSE",
+    "upstreamLicenseBlob": "0322cba2eac898acb5c8577a20657e7a74af55a4",
+    "verification": "Current upstream license; npm package declares the same SPDX license. Exact published-version notice still to verify before release."
+  },
+  {
+    "name": "@aws-sdk/credential-provider-login",
+    "version": "3.972.81",
+    "repository": "https://github.com/aws/aws-sdk-js-v3",
+    "file": "aws-sdk-credential-provider-login-3.972.81.txt",
+    "source": "https://github.com/aws/aws-sdk-js-v3/blob/main/LICENSE",
+    "upstreamLicenseBlob": "0322cba2eac898acb5c8577a20657e7a74af55a4",
+    "verification": "Current upstream license; npm package declares the same SPDX license. Exact published-version notice still to verify before release."
+  },
+  {
+    "name": "@aws-sdk/nested-clients",
+    "version": "3.997.48",
+    "repository": "https://github.com/aws/aws-sdk-js-v3",
+    "file": "aws-sdk-nested-clients-3.997.48.txt",
+    "source": "https://github.com/aws/aws-sdk-js-v3/blob/main/LICENSE",
+    "upstreamLicenseBlob": "0322cba2eac898acb5c8577a20657e7a74af55a4",
+    "verification": "Current upstream license; npm package declares the same SPDX license. Exact published-version notice still to verify before release."
+  },
+  {
+    "name": "standardwebhooks",
+    "version": "1.1.1",
+    "repository": "https://github.com/standard-webhooks/standard-webhooks",
+    "file": "standardwebhooks-1.1.1.txt",
+    "source": "https://github.com/standard-webhooks/standard-webhooks/blob/b4d2c14fc5b4ccff3ff271e3b087dff812254c59/libraries/LICENSE",
+    "upstreamLicenseBlob": "55b14b3a3ce649a2f1b05428dcc9c6db95b37c04",
+    "verification": "Library MIT license retrieved at published gitHead; matches npm package SPDX."
+  },
+  {
+    "name": "proxy-agent-negotiate",
+    "version": "1.1.0",
+    "repository": "https://github.com/TooTallNate/proxy-agents",
+    "file": "proxy-agent-negotiate-1.1.0.txt",
+    "source": "https://github.com/TooTallNate/proxy-agents/blob/main/packages/proxy-agent/LICENSE",
+    "upstreamLicenseBlob": "008728cb51847dcff9c68cf1d9c30d76b9323457",
+    "verification": "Current upstream license; npm package declares MIT. Exact published-version notice still to verify before release."
   }
 ]

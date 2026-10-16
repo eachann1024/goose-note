@@ -1,5 +1,5 @@
+import { notebookAiAgentContextSchema } from "../toolContext";
 import { tool } from "ai";
-import type { NotebookAiAgentContext } from "../types";
 import { executePreparedBatchPlan, prepareBatchPlan } from "./executor";
 import { normalizeBatchPlanInput } from "./input";
 import { batchExecutionSummary } from "./executionSummary";
@@ -120,11 +120,12 @@ export async function prepareBatchPlanForApproval(
 }
 
 export const executeBatchPlan = tool({
+  contextSchema: notebookAiAgentContextSchema,
   description:
     '准备并处理笔记变更计划。全部为 create 时 prepare 成功后自动写入；含 edit/search_replace/delete 时只生成审批卡，不立即写入。局部修改必须用 search_replace（oldString 须为 readPage 返回的精确片段，newString 可为空表示删除该片段，replaceAll 可选）；若误用 edit 且仅为局部差异，服务端会自动拆成 search_replace。整页重写才用 edit。参数格式：{title:"整理笔记",summary:"更新账号页",operations:[{type:"search_replace",pageId:"page-1",oldString:"旧片段",newString:"新片段"}]}。返回后停止；仅 create 时无需等待审批。',
   inputSchema: executeBatchPlanInputSchema,
-  execute: async (input, { experimental_context, toolCallId }) => {
-    const context = experimental_context as NotebookAiAgentContext;
+  execute: async (input, { context: toolContext, toolCallId }) => {
+    const context = toolContext;
     return prepareBatchPlanForApproval(input, {
       toolCallId,
       notebookId: context.notebookId,

@@ -15,7 +15,7 @@
 /* 折叠箭头换成与侧栏一致的 Lucide ChevronRight（描边 1.75）：
    BlockNote 内置的是 Material 实心箭头，与整体图标风格不符。
    用 mask + currentColor 适配深浅模式；展开旋转沿用 BlockNote 原有
-   .bn-toggle-wrapper[data-show-children=true] 的 rotate(90deg)。 */
+   .bn-toggle-button[aria-expanded="true"] 的 rotate(90deg)。 */
 .bn-editor .bn-toggle-button svg {
   display: none;
 }
@@ -145,28 +145,21 @@ html body .bn-side-menu button.goose-heading-fold-btn[aria-expanded="false"]:hov
   color: var(--goose-interactive-selected-fg) !important;
 }
 
-/* 普通折叠列表：箭头钉在首行 marker 位；子块跟标题文字对齐，不画竖线。 */
-.bn-block-content[data-content-type="toggleListItem"]
-  > div
-  > .bn-toggle-wrapper {
+/* BlockNote 0.56 把内容和子块放进 frame 的 slot；保持原有 22px marker 缩进。 */
+.bn-toggle-frame:has(> .bn-toggle-slot > .bn-block-content[data-content-type="toggleListItem"]) {
   position: relative;
-  display: flex;
-  align-items: center;
+  grid-template-columns: 22px minmax(0, 1fr);
   min-width: 0;
   width: 100%;
-  padding-left: 22px;
 }
-.bn-block-content[data-content-type="toggleListItem"]
-  > div
-  > .bn-toggle-wrapper
+.bn-toggle-frame:has(> .bn-toggle-slot > .bn-block-content[data-content-type="toggleListItem"])
   > .bn-toggle-button {
-  position: absolute;
-  left: 0;
-  top: 0;
+  align-self: start;
   height: 1.5em;
   display: flex;
   align-items: center;
 }
-.bn-block-content[data-content-type="toggleListItem"] ~ .bn-block-group {
+.bn-toggle-slot:has(> .bn-block-content[data-content-type="toggleListItem"])
+  > .bn-block-group {
   margin-left: 22px;
 }

@@ -1,7 +1,7 @@
 import type { BuildOptions } from "vite";
-import { debugMinify, debugSourcemap } from "../../vite.debug";
-import { createBuildInput } from "./targets";
-import { codeSplittingGroups } from "./chunkGroups";
+import { debugMinify, debugSourcemap } from "../../vite.debug.ts";
+import { createBuildInput } from "./targets.ts";
+import { codeSplittingGroups } from "./chunkGroups.ts";
 export function createBuildOptions(root: string): BuildOptions {
   return {
     outDir: "dist-electron/renderer",
