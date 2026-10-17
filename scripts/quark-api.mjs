@@ -114,6 +114,10 @@ export async function ensureFolder(cookie, name) {
   throw new QuarkFailure("未能准备夸克目录");
 }
 
+export async function renameFile(cookie, fid, fileName) {
+  await api(cookie, "POST", "file/rename", { body: { fid, file_name: fileName } });
+}
+
 export async function deleteFiles(cookie, ids) {
   const filelist = [...new Set(ids.filter(Boolean))];
   if (filelist.length === 0) return;

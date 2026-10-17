@@ -1,9 +1,8 @@
-import { appendFileSync, readdirSync, writeFileSync } from "node:fs";
-import { mkdtempSync } from "node:fs";
+import { appendFileSync, copyFileSync, mkdtempSync, readdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { QuarkFailure, assertCookie, deleteFiles, ensureFolder, listChildren, readCookie, uploadFile } from "./quark-api.mjs";
+import { QuarkFailure, assertCookie, deleteFiles, ensureFolder, listChildren, readCookie, renameFile, uploadFile } from "./quark-api.mjs";
 
 const FOLDER_NAME = "鹅的笔记安装包";
 const NOTE_NAME = "说明.txt";
@@ -37,16 +36,48 @@ function noteText(version) {
   return `鹅的笔记桌面版安装包。当前版本 v${version}（及上一版）。macOS 选 .dmg（Apple 芯片 arm64 / Intel x64），Windows 选 .exe（x64 / arm64），Linux 选 AppImage / deb / pacman。macOS 首次打开请看 https://github.com/eachann1024/goose-note/blob/main/docs/macos-installation.md 。源码与全部版本：https://github.com/eachann1024/goose-note/releases\n`;
 }
 
-function knownFiles(entries) {
-  return entries.filter((item) => item?.fid && !item.dir && item.file !== false && (item.file_name === NOTE_NAME || installerVersion(item.file_name)));
+function isFile(item, name) {
+  return item?.fid && item.file_name === name && item.file !== false && item.dir !== true && item.file_type !== 0;
 }
 
-async function replaceExisting(cookie, entries, name) {
-  const stale = entries.filter((item) => item.file_name === name && item.fid && item.file !== false && item.dir !== true && item.file_type !== 0);
-  if (stale.length === 0) return entries.filter((item) => item.file_name !== name);
-  await deleteFiles(cookie, stale.map((item) => item.fid));
-  console.log(`覆盖同名文件 ${name}`);
-  return entries.filter((item) => item.file_name !== name);
+function knownFiles(entries) {
+  return entries.filter((item) => isFile(item, item.file_name) && (item.file_name === NOTE_NAME || installerVersion(item.file_name)));
+}
+
+async function uploadReplacing(cookie, folderId, source, name) {
+  let entries = await listChildren(cookie, folderId);
+  const tempName = `${name}.uploading`;
+  const backupName = `${name}.previous`;
+  const backup = entries.find((item) => isFile(item, backupName));
+  if (backup && !entries.some((item) => isFile(item, name))) await renameFile(cookie, backup.fid, name);
+  entries = await listChildren(cookie, folderId);
+  const temps = entries.filter((item) => isFile(item, tempName) || (isFile(item, backupName) && entries.some((entry) => isFile(entry, name))));
+  if (temps.length) await deleteFiles(cookie, temps.map((item) => item.fid));
+  const current = (await listChildren(cookie, folderId)).filter((item) => isFile(item, name));
+  console.log(`上传 ${name}`);
+  if (current.length === 0) {
+    await uploadFile(cookie, folderId, source);
+    return;
+  }
+  if (current.length > 1) await deleteFiles(cookie, current.slice(1).map((item) => item.fid));
+  const staging = mkdtempSync(join(tmpdir(), "goose-quark-part-"));
+  const staged = join(staging, tempName);
+  copyFileSync(source, staged);
+  await uploadFile(cookie, folderId, staged);
+  const kept = current[0];
+  await renameFile(cookie, kept.fid, backupName);
+  const uploaded = (await listChildren(cookie, folderId)).find((item) => isFile(item, tempName));
+  if (!uploaded) {
+    await renameFile(cookie, kept.fid, name);
+    throw new QuarkFailure(`上传后未找到临时文件：${name}`);
+  }
+  try {
+    await renameFile(cookie, uploaded.fid, name);
+  } catch (error) {
+    await renameFile(cookie, kept.fid, name);
+    throw error;
+  }
+  await deleteFiles(cookie, [kept.fid]);
 }
 
 async function retainLatest(cookie, folderId, version) {
@@ -68,18 +99,11 @@ async function main() {
   const names = readdirSync(directory).filter((name) => installerVersion(name) === version).sort();
   if (names.length === 0) throw new QuarkFailure(`目录中没有 v${version} 的安装包`);
   const folderId = await ensureFolder(cookie, FOLDER_NAME);
-  let entries = await listChildren(cookie, folderId);
-  for (const name of names) {
-    entries = await replaceExisting(cookie, entries, name);
-    console.log(`上传 ${name}`);
-    await uploadFile(cookie, folderId, join(directory, name));
-  }
+  for (const name of names) await uploadReplacing(cookie, folderId, join(directory, name), name);
   const noteDir = mkdtempSync(join(tmpdir(), "goose-quark-"));
   const note = join(noteDir, NOTE_NAME);
   writeFileSync(note, noteText(version));
-  entries = await replaceExisting(cookie, entries, NOTE_NAME);
-  console.log(`上传 ${NOTE_NAME}`);
-  await uploadFile(cookie, folderId, note);
+  await uploadReplacing(cookie, folderId, note, NOTE_NAME);
   await retainLatest(cookie, folderId, version);
   const summary = process.env.GITHUB_STEP_SUMMARY;
   if (summary) appendFileSync(summary, `夸克网盘已上传 ${names.length} 个安装包，当前版本 v${version}。\n`);
