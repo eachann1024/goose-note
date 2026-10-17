@@ -217,8 +217,8 @@ linux:
   executableName: goose-note-app
   category: Utility
   vendor: ${pkg.author?.name || "Thinkly"}
-  synopsis: ${pkg.description || "Local-first note taking app"}
-  maintainer: ${linuxMaintainer}
+  synopsis: ${JSON.stringify(pkg.description || "Local-first note taking app")}
+  maintainer: ${JSON.stringify(linuxMaintainer)}
   target:
     - AppImage
     - deb
