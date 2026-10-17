@@ -15,6 +15,15 @@ const INSTALLERS = [
   /^goose-note-app-(\d+\.\d+\.\d+)\.pacman$/,
 ];
 
+function expectedInstallers(version) {
+  return [
+    `Goose.Note-${version}-arm64.dmg`, `Goose.Note-${version}.dmg`,
+    `Goose.Note-${version}-x64-setup.exe`, `Goose.Note-${version}-arm64-setup.exe`,
+    `Goose.Note-${version}.AppImage`, `goose-note-app_${version}_amd64.deb`,
+    `goose-note-app-${version}.pacman`,
+  ];
+}
+
 function installerVersion(name) {
   for (const pattern of INSTALLERS) {
     const match = pattern.exec(name);
@@ -96,8 +105,10 @@ async function main() {
   const directory = resolve(process.argv[2] ?? "");
   const version = String(process.argv[3] ?? "").replace(/^v/, "");
   if (!/^\d+\.\d+\.\d+$/.test(version)) throw new QuarkFailure("需要安装包目录和版本号，例如 1.2.3");
-  const names = readdirSync(directory).filter((name) => installerVersion(name) === version).sort();
-  if (names.length === 0) throw new QuarkFailure(`目录中没有 v${version} 的安装包`);
+  const present = new Set(readdirSync(directory));
+  const names = expectedInstallers(version);
+  const missing = names.filter((name) => !present.has(name));
+  if (missing.length) throw new QuarkFailure(`缺少安装包：${missing.join("、")}`);
   const folderId = await ensureFolder(cookie, FOLDER_NAME);
   for (const name of names) await uploadReplacing(cookie, folderId, join(directory, name), name);
   const noteDir = mkdtempSync(join(tmpdir(), "goose-quark-"));
