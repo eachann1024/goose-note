@@ -148,11 +148,16 @@ async function uploadReplacing(cookie, folderId, source, name) {
   const restored = files.some((item) => fileRole(name, item.file_name) === "final")
     ? undefined
     : newest(files.filter((item) => fileRole(name, item.file_name) === "previous" && fileSize(item) === localSize));
-  const chosen = exact ?? alias ?? reusable ?? restored;
+  const chosen = exact ?? alias ?? restored;
   if (chosen) {
     if (chosen.file_name !== name) await commitReplacement(cookie, folderId, name, chosen.fid);
     else await deleteFiles(cookie, files.filter((item) => item.fid !== chosen.fid).map((item) => item.fid));
-    console.log(chosen === reusable ? `沿用已上传文件 ${name} ${localSize}` : `跳过同名同大小 ${name} ${localSize}`);
+    console.log(`跳过同名同大小 ${name} ${localSize}`);
+    return;
+  }
+  if (reusable && !files.some((item) => item.file_name === name)) {
+    await commitReplacement(cookie, folderId, name, reusable.fid);
+    console.log(`沿用已上传文件 ${name} ${localSize}`);
     return;
   }
   const orphan = files.find((item) => fileRole(name, item.file_name) === "previous" && !files.some((entry) => fileRole(name, entry.file_name) === "final"));
