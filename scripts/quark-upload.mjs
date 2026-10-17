@@ -65,23 +65,19 @@ async function uploadReplacing(cookie, folderId, source, name) {
   if (temps.length) await deleteFiles(cookie, temps.map((item) => item.fid));
   const current = (await listChildren(cookie, folderId)).filter((item) => isFile(item, name));
   console.log(current.length ? `覆盖已有文件 ${name}` : `上传 ${name}`);
+  if (current.length > 1) await deleteFiles(cookie, current.slice(1).map((item) => item.fid));
   await uploadFile(cookie, folderId, source, tempName);
   const uploaded = (await listChildren(cookie, folderId)).find((item) => isFile(item, tempName));
   if (!uploaded) throw new QuarkFailure(`上传后未找到临时文件：${name}`);
   const kept = current[0];
-  if (current.length > 1) await deleteFiles(cookie, current.slice(1).map((item) => item.fid));
-  if (kept) await renameFile(cookie, kept.fid, backupName).catch(async () => deleteFiles(cookie, [kept.fid]));
+  if (kept) await renameFile(cookie, kept.fid, backupName);
   try {
     await renameFile(cookie, uploaded.fid, name);
   } catch (error) {
-    if (kept) await renameFile(cookie, kept.fid, name).catch(() => {});
-    const blockers = (await listChildren(cookie, folderId)).filter((item) => isFile(item, name) && item.fid !== uploaded.fid);
-    if (!blockers.length) throw error;
-    await deleteFiles(cookie, blockers.map((item) => item.fid));
-    await renameFile(cookie, uploaded.fid, name);
+    if (kept) await renameFile(cookie, kept.fid, name);
+    throw error;
   }
-  const backups = (await listChildren(cookie, folderId)).filter((item) => isFile(item, backupName));
-  if (backups.length) await deleteFiles(cookie, backups.map((item) => item.fid));
+  if (kept) await deleteFiles(cookie, [kept.fid]);
 }
 
 async function retainLatest(cookie, folderId, version) {
