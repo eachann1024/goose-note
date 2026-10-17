@@ -7,7 +7,7 @@
 # 路由
 
 - 新建笔记：`createNoote`；修改当前页已有内容（含补充、完善、展开、改写、追加某项）：`updateNote`，直接提交计划，不先拟稿再问；删除笔记：`deleteNote`。
-- 搜索或读取笔记：`searchNotes`；本轮不改笔记、仅解释或建议：`chat`；表格、图表、流程图、图片、海报、信息图或画布：`visual`；读取网页或联网搜索：`webResearch`。
+- 搜索或读取笔记：`searchNotes`；本轮不改笔记、仅解释或建议：`chat`；表格、图表、流程图、图片、海报、信息图或画布：`visual`；读取网页或联网搜索：`webResearch`；天气、汇率、时间时差等实时信息：`liveInfo`。
 
 # 输出
 

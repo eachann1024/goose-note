@@ -9,6 +9,7 @@ zh-Hans:
   chat: "对话"
   visualization: "可视化"
   webResearch: "网页研究"
+  liveInfo: "实时信息"
 en:
   createNote: "Create note"
   editNotes: "Edit notes"
@@ -17,6 +18,7 @@ en:
   chat: "Chat"
   visualization: "Visualization"
   webResearch: "Web research"
+  liveInfo: "Live info"
 `;
 const t = createTranslator(messages);
 export function readObject(value: unknown): Record<string, unknown> | null {
@@ -41,4 +43,5 @@ export const SKILL_LABELS: Record<string, string> = {
   get chat() { return t("chat"); },
   get visual() { return t("visualization"); },
   get webResearch() { return t("webResearch"); },
+  get liveInfo() { return t("liveInfo"); },
 };

@@ -3,79 +3,98 @@ import { createTranslator, i18nYaml } from "@/i18n";
 
 const localMessages = i18nYaml<"src/pages/workspace/components/search-sheet/SearchSheetAnswer.tsx#localMessages:1">`
 zh-Hans:
-  readingNotes: "正在阅读 {{count}} 篇相关笔记…"
-  thinking: "正在思考…"
-  tool_understand: "正在理解问题…"
-  tool_searchNotes: "正在搜索笔记…"
-  tool_readPage: "正在阅读笔记…"
-  tool_listPages: "正在查看页面列表…"
-  tool_searchWeb: "正在联网搜索…"
-  tool_readWebPage: "正在读取网页…"
   sources: "来源"
   backToResults: "返回结果"
   continueInAiPanel: "在 AI 面板继续"
+  jumpToLatest: "回到最新"
 en:
-  readingNotes: "Reading related notes ({{count}})…"
-  thinking: "Thinking…"
-  tool_understand: "Understanding the question…"
-  tool_searchNotes: "Searching notes…"
-  tool_readPage: "Reading a note…"
-  tool_listPages: "Listing notes…"
-  tool_searchWeb: "Searching the web…"
-  tool_readWebPage: "Reading a web page…"
   sources: "Sources"
   backToResults: "Back to results"
   continueInAiPanel: "Continue in AI panel"
+  jumpToLatest: "Jump to latest"
 `;
 const uiText = createTranslator(localMessages);
-import { memo } from "react";
+import { memo, type RefObject } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import { formatShortcutToken } from "@/lib/shortcut-platform";
 import { Streamdown } from "streamdown";
 import { cjk } from "@streamdown/cjk";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, FileText, MessageSquare, Sparkles } from "@/components/ui/icons";
+import { ArrowDown, ArrowLeft, ArrowRight, FileText, Globe, MessageSquare, Sparkles } from "@/components/ui/icons";
+import type { InfoCardData, WebResultsCardData } from "@/lib/notebook-ai/cards/types";
+import { InfoCard } from "../ai-cards/InfoCard";
+import { domainOf, openExternalUrl } from "../ai-cards/webLinks";
+import { ROW_SPRING } from "../ai-cards/cardMotion";
 import type { SheetAnswer } from "./useSheetAnswer";
 import { visibleSources } from "./sheetAnswerState";
-
-const TOOL_HINTS = {
-  understand: "tool_understand",
-  searchNotes: "tool_searchNotes", readPage: "tool_readPage", listPages: "tool_listPages", searchWeb: "tool_searchWeb", readWebPage: "tool_readWebPage",
-} as const;
-
-function pendingHint(answer: SheetAnswer) {
-  const toolKey = answer.tool ? TOOL_HINTS[answer.tool as keyof typeof TOOL_HINTS] : undefined;
-  if (toolKey) return uiText(toolKey);
-  if (answer.status !== "loading") return null;
-  return answer.sources.length ? uiText("readingNotes", {count: answer.sources.length}) : uiText("thinking");
-}
+import { SearchSheetSteps } from "./SearchSheetSteps";
+import { useStickToBottom } from "./useStickToBottom";
 
 const MD_PLUGINS = { cjk };
 const MD_CONTROLS = { table: false, code: true, mermaid: false } as const;
+/** 新到的字以 ease-out-expo 轻微上浮淡入；关键帧见 search-sheet.css 的 sd-thinklyRise。 */
+const MD_ANIMATION = { animation: "thinklyRise", duration: 320, easing: "cubic-bezier(0.16, 1, 0.3, 1)", sep: "word" } as const;
 
-export const SearchSheetAnswer = memo(function SearchSheetAnswer({ answer, onBack, onOpenSource, onContinue }: {
+type WebLink = WebResultsCardData["results"][number];
+
+/** 网页来源去重后最多列 6 条，按出现顺序。 */
+function webLinks(cards: InfoCardData[]): WebLink[] {
+  const seen = new Set<string>();
+  const links: WebLink[] = [];
+  for (const card of cards) {
+    if (card.kind !== "webResults") continue;
+    for (const result of card.results) if (!seen.has(result.url)) { seen.add(result.url); links.push(result); }
+  }
+  return links.slice(0, 6);
+}
+
+export const SearchSheetAnswer = memo(function SearchSheetAnswer({ answer, scrollRef, onBack, onOpenSource, onContinue }: {
   answer: SheetAnswer;
+  scrollRef: RefObject<HTMLDivElement | null>;
   onBack: () => void;
   onOpenSource: (id: string) => void;
   onContinue?: () => void;
 }) {
   useLocale();
   const waiting = answer.status === "loading";
-  const hint = pendingHint(answer);
+  const streaming = answer.status === "streaming";
   const sources = visibleSources(answer);
-  return <section className="search-sheet-answer" aria-live="polite" aria-busy={waiting || answer.status === "streaming"}>
+  const infoCards = answer.cards.filter(card => card.kind !== "webResults");
+  const links = webLinks(answer.cards);
+  const { following, jumpToLatest } = useStickToBottom(scrollRef);
+  return <section className="search-sheet-answer" aria-live="polite" aria-busy={waiting || streaming}>
     <div className="search-sheet-answer-head">
       <Sparkles size={16} aria-hidden="true"/>
       <span className="search-sheet-answer-question">{answer.question}</span>
     </div>
-    {answer.text && <Streamdown className="ai-md search-sheet-answer-md" mode="streaming" plugins={MD_PLUGINS} controls={MD_CONTROLS}>{answer.text}</Streamdown>}
-    {hint && <p className="search-sheet-answer-hint" data-pending="true">{hint}</p>}
+    <SearchSheetSteps key={answer.requestId} answer={answer}/>
+    {infoCards.length > 0 && <div className="search-sheet-answer-cards">
+      {infoCards.map((card, index) => <InfoCard key={`${card.kind}-${index}`} card={card}/>)}
+    </div>}
+    {answer.text && <Streamdown className="ai-md search-sheet-answer-md" mode="streaming" isAnimating={streaming} animated={MD_ANIMATION}
+      plugins={MD_PLUGINS} controls={MD_CONTROLS}>{answer.text}</Streamdown>}
     {answer.status === "error" && <p className="search-sheet-answer-hint" role="alert">{answer.error}</p>}
-    {sources.length > 0 && <div className="search-sheet-answer-sources">
+    {(sources.length > 0 || links.length > 0) && <div className="search-sheet-answer-sources">
       <span className="search-sheet-label">{uiText("sources")}</span>
       {sources.map(({ index, source }) => <Button contentStyle="preserve" variant="ghost" size="sm" key={source.id} className="search-sheet-source" onClick={() => onOpenSource(source.id)}>
         {index && <span className="search-sheet-source-index">{index}</span>}<FileText size={14} aria-hidden="true"/><span className="search-sheet-source-title">{source.title}</span>
       </Button>)}
+      {links.map(link => <Button contentStyle="preserve" variant="ghost" size="sm" key={link.url} className="search-sheet-source" data-web="true"
+        title={link.url} onClick={() => openExternalUrl(link.url)}>
+        <Globe size={14} aria-hidden="true"/><span className="search-sheet-source-title">{link.title || domainOf(link.url)}</span>
+        <span className="search-sheet-source-index">{domainOf(link.url)}</span>
+      </Button>)}
     </div>}
+    <div className="search-sheet-follow" aria-hidden={following || undefined}>
+      <AnimatePresence>
+        {!following && (waiting || streaming) && <motion.div key="follow" initial={{ opacity: 0, y: 8, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 8, scale: 0.96, transition: { duration: 0.15, ease: [0.4, 0, 1, 1] } }} transition={ROW_SPRING}>
+          <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-follow-pill" onClick={jumpToLatest}>
+            <ArrowDown size={14} aria-hidden="true"/>{uiText("jumpToLatest")}
+          </Button>
+        </motion.div>}
+      </AnimatePresence>
+    </div>
     <div className="search-sheet-answer-actions">
       <Button contentStyle="preserve" variant="ghost" size="sm" className="search-sheet-action" onClick={onBack}>
         <ArrowLeft size={14} aria-hidden="true"/>{uiText("backToResults")}<kbd className="search-sheet-kbd" aria-hidden="true">Esc</kbd>

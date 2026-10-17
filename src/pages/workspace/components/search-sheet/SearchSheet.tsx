@@ -86,6 +86,7 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
   const sheetRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const answerListRef = useRef<HTMLDivElement>(null);
   const returnFocus = useRef<HTMLElement | null>(null);
   const skipRestore = useRef(false);
   const composing = useRef(false);
@@ -224,8 +225,8 @@ export const SearchSheet = memo(function SearchSheet({ aiNotebookId }: { aiNoteb
         {draft ? <IconButton size="xs" className="p-0" aria-label={uiText("clearSearch")} onClick={clearSearch}><X size={16}/></IconButton> : <kbd className="search-sheet-kbd" aria-hidden="true">Esc</kbd>}
       </div>
       <SearchSheetFilters count={count}/>
-      {answer ? <div className="search-sheet-list" data-answer="true">
-        <SearchSheetAnswer answer={answer} onBack={resetAnswer} onOpenSource={openSource} onContinue={continueInPanel}/>
+      {answer ? <div ref={answerListRef} className="search-sheet-list" data-answer="true">
+        <SearchSheetAnswer key={answer.requestId} answer={answer} scrollRef={answerListRef} onBack={resetAnswer} onOpenSource={openSource} onContinue={continueInPanel}/>
       </div> : <div key={session.focusNonce} ref={listRef} className="search-sheet-list" onScroll={e => { const el = e.currentTarget; if (hasMore && el.scrollTop + el.clientHeight >= el.scrollHeight - 100) loadMoreResults(); }}>
         <div key={resultsKey} id="search-sheet-results" className="search-sheet-results" role="listbox" aria-label={uiText("searchResults")}>
           {aiQuery && <AskAiRow query={aiQuery} selected={selectedId === AI_ROW_ID} onAsk={askAi}/>}

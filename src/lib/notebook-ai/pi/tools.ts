@@ -4,6 +4,9 @@ zh-Hans:
   loadSkill: "加载 Skill"
   searchWeb: "联网搜索"
   readWebPage: "读取网页"
+  getWeather: "查询天气"
+  getExchangeRate: "查询汇率"
+  getWorldTime: "查看时间"
   listNotebooks: "列出笔记本"
   listPages: "列出页面"
   searchNotes: "搜索笔记"
@@ -17,6 +20,9 @@ en:
   loadSkill: "Load skill"
   searchWeb: "Search the web"
   readWebPage: "Read web page"
+  getWeather: "Check weather"
+  getExchangeRate: "Check exchange rate"
+  getWorldTime: "Check time"
   listNotebooks: "List notebooks"
   listPages: "List notes"
   searchNotes: "Search notes"
@@ -50,6 +56,7 @@ const TOOL_PARAMETERS: Record<keyof typeof notebookAiTools, TSchema> = {
         Type.Literal("chat"),
         Type.Literal("visual"),
         Type.Literal("webResearch"),
+        Type.Literal("liveInfo"),
       ],
       { description: "要加载的 Skill" },
     ),
@@ -59,6 +66,23 @@ const TOOL_PARAMETERS: Record<keyof typeof notebookAiTools, TSchema> = {
   }),
   readWebPage: Type.Object({
     url: Type.String({ description: "网页 URL" }),
+  }),
+  getWeather: Type.Object({
+    location: Type.String({ description: "城市或地区名" }),
+  }),
+  getExchangeRate: Type.Object({
+    from: Type.String({ description: "源货币 ISO 代码，如 USD" }),
+    to: Type.String({ description: "目标货币 ISO 代码，如 CNY" }),
+    amount: Type.Optional(Type.Number({ description: "换算金额，默认 1" })),
+  }),
+  getWorldTime: Type.Object({
+    places: Type.Array(
+      Type.Object({
+        label: Type.String({ description: "显示名称，如 纽约" }),
+        timeZone: Type.String({ description: "IANA 时区，如 America/New_York" }),
+      }),
+      { minItems: 1, maxItems: 6 },
+    ),
   }),
   listNotebooks: Type.Object({}),
   listPages: Type.Object({
