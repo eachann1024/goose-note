@@ -173,7 +173,6 @@ function delay(ms) {
 }
 
 async function confirmFinish(cookie, taskId, objKey, fallbackFid) {
-  let fid = fallbackFid || "";
   let lastError;
   for (let attempt = 1; attempt <= 5; attempt += 1) {
     try {
@@ -181,26 +180,22 @@ async function confirmFinish(cookie, taskId, objKey, fallbackFid) {
         body: { task_id: taskId, ...(objKey ? { obj_key: objKey } : {}) },
       });
       const data = payload.data ?? {};
-      if (data.fid) fid = String(data.fid);
-      if (data.finish === false) {
-        if (attempt < 5) {
-          console.log(`完成确认未就绪，第 ${attempt} 次后重试`);
-          await delay(attempt * 1000);
-          continue;
-        }
-        break;
+      if (data.finish === true) {
+        const fid = String(data.fid || fallbackFid || "");
+        if (fid) return fid;
+        const missing = new QuarkFailure("完成上传后没有文件编号");
+        missing.reason = "rename_target_missing";
+        throw missing;
       }
-      if (fid) return fid;
-      break;
+      if (attempt < 5) {
+        console.log(`完成确认未就绪，第 ${attempt} 次后重试`);
+        await delay(attempt * 1000);
+      }
     } catch (error) {
-      if (error?.cookie || error?.reason === "cookie_invalid") throw error;
+      if (error?.cookie || error?.reason === "cookie_invalid" || error?.reason === "rename_target_missing") throw error;
       lastError = error;
       if (attempt < 5) await delay(attempt * 1000);
     }
-  }
-  if (fid) {
-    console.log("完成确认未返回新编号，使用预上传文件编号");
-    return fid;
   }
   if (lastError) {
     if (!lastError.reason) lastError.reason = "finish_not_ready";

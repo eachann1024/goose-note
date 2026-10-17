@@ -167,9 +167,9 @@ async function uploadReplacing(cookie, folderId, source, name) {
   try {
     fid = (await uploadFile(cookie, folderId, source, `${name}.uploading`)).fid ?? "";
   } catch (error) {
-    if (error?.reason !== "finish_not_ready") throw error;
+    if (error?.reason !== "rename_target_missing") throw error;
     pending = error;
-    console.log(`完成确认未就绪，改为轮询列表 ${name}`);
+    console.log(`完成确认没有文件编号，改为轮询列表 ${name}`);
   }
   if (!fid) fid = await pollUploaded(cookie, folderId, name, localSize, existingFids);
   if (!fid) throw pending ?? withReason(new QuarkFailure(`上传后没有文件编号：${name}`), "rename_target_missing");
