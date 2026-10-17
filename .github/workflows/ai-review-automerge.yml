@@ -37,8 +37,6 @@ jobs:
     permissions:
       contents: read
       pull-requests: read
-    outputs:
-      review: ${{ steps.pragent.outputs.review }}
     steps:
       - name: Checkout trusted review script
         uses: actions/checkout@v4
@@ -55,11 +53,6 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           bash .github/codex-review/run.sh > "$RUNNER_TEMP/review.json"
-          {
-            echo 'review<<REVIEW_JSON_EOF'
-            cat "$RUNNER_TEMP/review.json"
-            echo 'REVIEW_JSON_EOF'
-          } >> "$GITHUB_OUTPUT"
           {
             echo '## AI 审核结论'
             echo
@@ -149,12 +142,21 @@ jobs:
       issues: write
       checks: read
       statuses: read
+      actions: read
     steps:
       - name: Checkout trusted merge script
         uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
+      # 审核结果走产物传递：job output 会被多行 Secret 的按行掩码误判为含密钥而整段丢弃。
+      - name: Download review result
+        if: needs.review.result == 'success'
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: codex-review
+          path: ${{ runner.temp }}/codex-review
       - name: Decide and merge
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -162,5 +164,7 @@ jobs:
           PR: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           REVIEW_RESULT: ${{ needs.review.result }}
-          REVIEW_JSON: ${{ needs.review.outputs.review }}
-        run: python3 .github/codex-review/merge.py
+        run: |
+          REVIEW_JSON="$(cat "$RUNNER_TEMP/codex-review/review.json" 2>/dev/null || true)"
+          export REVIEW_JSON
+          python3 .github/codex-review/merge.py
