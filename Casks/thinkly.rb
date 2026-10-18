@@ -1,4 +1,7 @@
-cask "goose-note" do
+# Renamed from goose-note via cask_renames.json.
+# This revision still downloads the published 1.7.317 Goose.Note DMGs.
+# The next release rewrites the URL to Thinkly-*.dmg. The bundle inside stays Goose Note.app.
+cask "thinkly" do
   arch arm: "-arm64", intel: ""
   version "1.7.317,6e3ebc5"
   sha256 arm: "ff64a0817d5f1fcfa6abf193359400b352d5c90ac58715a81cfb2a6955256c3b",

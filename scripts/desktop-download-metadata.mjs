@@ -1,14 +1,16 @@
 import assert from "node:assert/strict";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { REPO, versionFromTag } from "./desktop-release-support.mjs";
 import { publishedReleaseNotes } from "./desktop-release-notes.mjs";
 
 export function releaseInstallers(version) {
   return [
-    `Goose.Note-${version}-arm64.dmg`, `Goose.Note-${version}.dmg`,
-    `Goose.Note-${version}-arm64-mac.zip`, `Goose.Note-${version}-mac.zip`,
-    `Goose.Note-${version}-x64-setup.exe`, `Goose.Note-${version}-arm64-setup.exe`,
-    `Goose.Note-${version}.AppImage`, `goose-note-app_${version}_amd64.deb`,
-    `goose-note-app-${version}.pacman`,
+    `Thinkly-${version}-arm64.dmg`, `Thinkly-${version}.dmg`,
+    `Thinkly-${version}-arm64-mac.zip`, `Thinkly-${version}-mac.zip`,
+    `Thinkly-${version}-x64-setup.exe`, `Thinkly-${version}-arm64-setup.exe`,
+    `Thinkly-${version}.AppImage`, `Thinkly_${version}_amd64.deb`,
+    `Thinkly-${version}.pacman`,
   ];
 }
 
@@ -17,7 +19,8 @@ export function releaseAssets(version) {
 }
 
 export function createUpdateFeed(tag, assets, hashes, repo = REPO, releaseNotes = "", publishedAt = "") {
-  // Already shipped clients only accept the legacy download prefix. GitHub redirects it here.
+  // 已发布客户端按后缀选包，不看 Goose.Note 前缀。信任校验比对的是这条地址原文，不跟随重定向：
+  // v1.7.240 起只接受 goose-notes，v1.7.317 同时接受 goose-note。下载本身由 fetch 跟随 301 到 thinkly。
   const downloadRepo = repo === "eachann1024/thinkly" || repo === "eachann1024/goose-note"
     ? "eachann1024/goose-notes"
     : repo;
@@ -32,15 +35,15 @@ export function createUpdateFeed(tag, assets, hashes, repo = REPO, releaseNotes 
 }
 
 export function createCask(version, tag, hashes, repo = REPO, signed = false) {
-  const arm = `Goose.Note-${version}-arm64.dmg`;
-  const intel = `Goose.Note-${version}.dmg`;
+  const arm = `Thinkly-${version}-arm64.dmg`;
+  const intel = `Thinkly-${version}.dmg`;
   assert.ok(hashes.has(arm) && hashes.has(intel), "Both macOS DMGs are required");
-  return `cask "goose-note" do
+  return `cask "thinkly" do
   arch arm: "-arm64", intel: ""
   version "${version},${tag.slice(`v${version}-`.length)}"
   sha256 arm: "${hashes.get(arm)}",
          intel: "${hashes.get(intel)}"
-  url "https://github.com/${repo}/releases/download/v#{version.csv.first}-#{version.csv.second}/Goose.Note-#{version.csv.first}#{arch}.dmg"
+  url "https://github.com/${repo}/releases/download/v#{version.csv.first}-#{version.csv.second}/Thinkly-#{version.csv.first}#{arch}.dmg"
   name "Thinkly"
   desc "Thinkly: Keep every passing thought. Ask your past anytime."
   homepage "https://github.com/${repo}"
@@ -68,7 +71,7 @@ end
 export function downloadMetadata(version, tag, hashes, signed, publishedAt, releaseNotes = "") {
   const installers = releaseInstallers(version);
   const files = {
-    "Casks/goose-note.rb": createCask(version, tag, hashes, REPO, signed),
+    "Casks/thinkly.rb": createCask(version, tag, hashes, REPO, signed),
     "updates/latest.json": JSON.stringify(createUpdateFeed(tag, installers, hashes, REPO, releaseNotes, publishedAt)) + "\n",
   };
   if (signed) {
@@ -101,4 +104,15 @@ export function publishedDownloadMetadata(release) {
   const signed = (release.body ?? "").includes("macOS 安装包已完成代码签名与公证。");
   return downloadMetadata(version, release.tag_name, hashes, signed, release.published_at,
     publishedReleaseNotes(release.body));
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  const version = /^\d+\.\d+\.\d+$/.test(process.argv[2] ?? "") ? process.argv[2] : "1.7.317";
+  const tag = `v${version}-example1`;
+  const hashes = new Map(releaseInstallers(version).map((name) => [name, "a".repeat(64)]));
+  const files = downloadMetadata(version, tag, hashes, false, "2026-10-18T00:00:00.000Z", "example");
+  for (const [path, content] of Object.entries(files)) {
+    console.log(`----- ${path} -----`);
+    console.log(content);
+  }
 }

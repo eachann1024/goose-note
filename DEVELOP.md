@@ -26,7 +26,7 @@ bun run linux        # Linux 包
 
 各平台命令自动编译 renderer、Electron main/preload，准备 `dist-electron/app-pack` 后打包。CI 和 Python 构建脚本通过 `node scripts/run-task.mjs build` 调用公共编译流程；需要调试信息时设置环境变量 `GOOSE_DEBUG=1`。
 
-GitHub 仓库是 `eachann1024/thinkly`。中文系统显示「思绪 · Thinkly」，英文系统显示 Thinkly。为兼容已安装版本，保留应用 ID `com.goosenote.desktop`、数据目录名 Goose Note、安装包文件名、Linux 包名及可执行文件名 `goose-note-app`、npm 包名 `goose-note`、Homebrew cask 名 `goose-note`、已保存的 WebDAV 目录和 SignPath 项目 slug。更新清单里的安装包下载地址继续用 `eachann1024/goose-notes`，由 GitHub 重定向到本仓库；客户端同时接受 `thinkly`、`goose-note` 和 `goose-notes`。不要再占用这些旧仓库名，以免已安装的版本无法更新。
+GitHub 仓库是 `eachann1024/thinkly`。中文系统显示「思绪 · Thinkly」，英文系统显示 Thinkly。为兼容已安装版本，保留应用 ID `com.goosenote.desktop`、数据目录名 Goose Note、磁盘上的 `Goose Note.app`、Linux 包名及可执行文件名 `goose-note-app`、npm 包名 `goose-note`、已保存的 WebDAV 目录和 SignPath 项目 slug。安装包文件名从下一版起改为 `Thinkly-*`；Homebrew cask 从 `goose-note` 改为 `thinkly`，`cask_renames.json` 让 `brew upgrade` 迁移。更新清单里的安装包下载地址继续用 `eachann1024/goose-notes`，由 GitHub 重定向到本仓库；已发布客户端按后缀认安装包，并只信任 `goose-notes` / `goose-note` 下载地址原文。不要再占用这些旧仓库名，以免已安装的版本无法更新。
 
 跨平台单入口脚本（参考 1Panel build.py 思路，三平台通用）：
 

@@ -58,13 +58,15 @@ https://github.com/user-attachments/assets/95f9bf50-3992-4f99-a256-b52ee6f41b74
 
 | 系统平台 | 安装包名称 | 架构说明与推荐 |
 | :--- | :--- | :--- |
-| **macOS** | `Goose.Note-*-arm64.dmg` | **Apple Silicon（M1 / M2 / M3 / M4 芯片，绝大多数 Mac 选此项）** |
-| | `Goose.Note-*.dmg` | Intel 芯片老款 Mac（文件名无 arm64 标识） |
-| **Windows** | `Goose.Note-*-x64-setup.exe` | **64 位 PC（Intel / AMD，绝大多数 Windows 电脑选此项）** |
-| | `Goose.Note-*-arm64-setup.exe` | 骁龙 / ARM 架构 Windows 设备 |
-| **Linux** | `Goose.Note-*.AppImage` | 免安装通用版（双击运行，部分发行版需 FUSE） |
-| | `goose-note-app_*_amd64.deb` | Debian / Ubuntu 等系统 |
-| | `goose-note-app-*.pacman` | Arch Linux / Omarchy 等 Arch 系 |
+| **macOS** | `Thinkly-*-arm64.dmg` | **Apple Silicon（M1 / M2 / M3 / M4 芯片，绝大多数 Mac 选此项）** |
+| | `Thinkly-*.dmg` | Intel 芯片老款 Mac（文件名无 arm64 标识） |
+| **Windows** | `Thinkly-*-x64-setup.exe` | **64 位 PC（Intel / AMD，绝大多数 Windows 电脑选此项）** |
+| | `Thinkly-*-arm64-setup.exe` | 骁龙 / ARM 架构 Windows 设备 |
+| **Linux** | `Thinkly-*.AppImage` | 免安装通用版（双击运行，部分发行版需 FUSE） |
+| | `Thinkly_*_amd64.deb` | Debian / Ubuntu 等系统 |
+| | `Thinkly-*.pacman` | Arch Linux / Omarchy 等 Arch 系 |
+
+1.7.317 及更早的 Release 附件仍是 `Goose.Note-*` 和 `goose-note-app-*`。磁盘上的应用仍是 `Goose Note.app`，Linux 包名仍是 `goose-note-app`。
 
 ### macOS 首次安装
 
@@ -82,9 +84,9 @@ Windows 如遇 SmartScreen 提示，仅在确认来自官方发布后选择「�
 
 ```bash
 brew tap eachann1024/thinkly https://github.com/eachann1024/thinkly
-brew install --cask eachann1024/thinkly/goose-note
-# 升级
-brew upgrade --cask goose-note
+brew install --cask eachann1024/thinkly/thinkly
+# 升级。已装 goose-note 的，brew update 后按 cask_renames.json 迁到 thinkly
+brew upgrade --cask thinkly
 ```
 
 </details>

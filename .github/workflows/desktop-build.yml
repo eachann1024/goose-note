@@ -68,7 +68,7 @@ jobs:
       - name: Archive exact tracked source
         run: |
           mkdir source-artifact
-          git archive --format=tar.gz --prefix=goose-note-source/ HEAD > source-artifact/goose-note-source-${SOURCE_SHA}.tar.gz
+          git archive --format=tar.gz --prefix=thinkly-source/ HEAD > source-artifact/thinkly-source-${SOURCE_SHA}.tar.gz
           test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
           printf '%s\n' "$SOURCE_SHA" > source-artifact/COMMIT.txt
           cp BUILD-ARTIFACTS.md LICENSE SOURCE-CODE.md THIRD-PARTY-NOTICES.txt source-artifact/
@@ -230,7 +230,7 @@ jobs:
           '
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: goose-note-${{ matrix.platform }}-${{ matrix.arch }}-${{ env.SOURCE_SHA }}
+          name: thinkly-${{ matrix.platform }}-${{ matrix.arch }}-${{ env.SOURCE_SHA }}
           path: dist-desktop/ci/
           if-no-files-found: error
           retention-days: 30
@@ -242,7 +242,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     concurrency:
-      group: goose-note-publish-${{ github.ref }}
+      group: thinkly-publish-${{ github.ref }}
       cancel-in-progress: false
     permissions:
       contents: write
@@ -272,7 +272,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     concurrency:
-      group: goose-note-publish-${{ github.ref }}
+      group: thinkly-publish-${{ github.ref }}
       cancel-in-progress: false
     permissions:
       contents: write
@@ -298,7 +298,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     concurrency:
-      group: goose-note-publish-${{ github.ref }}
+      group: thinkly-publish-${{ github.ref }}
       cancel-in-progress: false
     permissions:
       contents: read

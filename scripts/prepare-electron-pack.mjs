@@ -174,7 +174,10 @@ mac:
       arch:
         - arm64
         - x64
+  # 只改压缩包文件名。.app 仍由 productName 决定。x64 的 CI 会去掉 -\${arch}，避免 -x64.dmg。
+  artifactName: Thinkly-\${version}-\${arch}-mac.\${ext}
 dmg:
+  artifactName: Thinkly-\${version}-\${arch}.\${ext}
   title: Thinkly
   background: dmg-assets/background.tiff
   window:
@@ -209,10 +212,10 @@ nsis:
   installerIcon: icon.ico
   uninstallerIcon: icon.ico
   installerHeaderIcon: icon.ico
-  # 安装包文件名继续用 productName（Goose Note），发布时再收成 Goose.Note-*。
+  # 安装包文件名与 productName 分开，避免改 .exe / 安装目录名。
   shortcutName: Thinkly
   uninstallDisplayName: Thinkly
-  artifactName: \${productName}-\${version}-\${arch}-setup.\${ext}
+  artifactName: Thinkly-\${version}-\${arch}-setup.\${ext}
 linux:
   icon: icon.png
   executableName: goose-note-app
@@ -235,12 +238,14 @@ linux:
       # 打包版 WM_CLASS 是 productName 的小写中划线形式 "goose-note"（实测 AppImage/deb）；
       # 开发实例使用 package.json name "goose-note"；保留旧可执行文件名以兼容已安装包。
       StartupWMClass: goose-note
+appImage:
+  artifactName: Thinkly-\${version}.\${ext}
 deb:
   packageName: goose-note-app
-  artifactName: goose-note-app_\${version}_\${arch}.\${ext}
+  artifactName: Thinkly_\${version}_\${arch}.\${ext}
 pacman:
   packageName: goose-note-app
-  artifactName: goose-note-app-\${version}.\${ext}
+  artifactName: Thinkly-\${version}.\${ext}
   depends:
     - gtk3
     - nss

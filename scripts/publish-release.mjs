@@ -49,7 +49,7 @@ async function main() {
   assertPublishVersion(version, tag, releases);
   const releaseNotes = versionReleaseNotes(readFileSync(join(ROOT, "CHANGELOG.md"), "utf8"), version);
   const input = join(ROOT, "artifacts");
-  const stage = mkdtempSync(join(tmpdir(), "goose-release-"));
+  const stage = mkdtempSync(join(tmpdir(), "thinkly-release-"));
   try {
     const builds = verifyBuildRecords(input, version, sha);
     const signed = ["arm64", "x64"].every((arch) =>
@@ -77,13 +77,13 @@ async function main() {
       "",
       "| 平台 | 安装包直接下载 | 架构与说明 |",
       "| :--- | :--- | :--- |",
-      `| **macOS** | [Goose.Note-${version}-arm64.dmg](${baseDownloadUrl}/Goose.Note-${encodeURIComponent(version)}-arm64.dmg) | **Apple Silicon（M1 / M2 / M3 / M4 芯片，绝大多数 Mac 选这个）** |`,
-      `| | [Goose.Note-${version}.dmg](${baseDownloadUrl}/Goose.Note-${encodeURIComponent(version)}.dmg) | Intel 芯片老款 Mac（文件名无 arm64 后缀） |`,
-      `| **Windows** | [Goose.Note-${version}-x64-setup.exe](${baseDownloadUrl}/Goose.Note-${encodeURIComponent(version)}-x64-setup.exe) | **64 位 PC（Intel / AMD，绝大多数 Windows 电脑选这个）** |`,
-      `| | [Goose.Note-${version}-arm64-setup.exe](${baseDownloadUrl}/Goose.Note-${encodeURIComponent(version)}-arm64-setup.exe) | 骁龙等 ARM 架构 Windows 设备 |`,
-      `| **Linux** | [Goose.Note-${version}.AppImage](${baseDownloadUrl}/Goose.Note-${encodeURIComponent(version)}.AppImage) | 免安装通用版（双击运行） |`,
-      `| | [goose-note-app_${version}_amd64.deb](${baseDownloadUrl}/goose-note-app_${encodeURIComponent(version)}_amd64.deb) | Debian / Ubuntu |`,
-      `| | [goose-note-app-${version}.pacman](${baseDownloadUrl}/goose-note-app-${encodeURIComponent(version)}.pacman) | Arch Linux / Omarchy（\`sudo pacman -U ./goose-note-app-${version}.pacman\`） |`,
+      `| **macOS** | [Thinkly-${version}-arm64.dmg](${baseDownloadUrl}/Thinkly-${encodeURIComponent(version)}-arm64.dmg) | **Apple Silicon（M1 / M2 / M3 / M4 芯片，绝大多数 Mac 选这个）** |`,
+      `| | [Thinkly-${version}.dmg](${baseDownloadUrl}/Thinkly-${encodeURIComponent(version)}.dmg) | Intel 芯片老款 Mac（文件名无 arm64 后缀） |`,
+      `| **Windows** | [Thinkly-${version}-x64-setup.exe](${baseDownloadUrl}/Thinkly-${encodeURIComponent(version)}-x64-setup.exe) | **64 位 PC（Intel / AMD，绝大多数 Windows 电脑选这个）** |`,
+      `| | [Thinkly-${version}-arm64-setup.exe](${baseDownloadUrl}/Thinkly-${encodeURIComponent(version)}-arm64-setup.exe) | 骁龙等 ARM 架构 Windows 设备 |`,
+      `| **Linux** | [Thinkly-${version}.AppImage](${baseDownloadUrl}/Thinkly-${encodeURIComponent(version)}.AppImage) | 免安装通用版（双击运行） |`,
+      `| | [Thinkly_${version}_amd64.deb](${baseDownloadUrl}/Thinkly_${encodeURIComponent(version)}_amd64.deb) | Debian / Ubuntu |`,
+      `| | [Thinkly-${version}.pacman](${baseDownloadUrl}/Thinkly-${encodeURIComponent(version)}.pacman) | Arch Linux / Omarchy（\`sudo pacman -U ./Thinkly-${version}.pacman\`） |`,
       "",
       "### macOS 安装说明",
       "",
