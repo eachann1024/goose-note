@@ -6,7 +6,8 @@ import { QuarkFailure, assertCookie, deleteFiles, ensureFolder, listChildren, re
 import { uploadFile } from "./quark-oss.mjs";
 import { releaseInstallers } from "./desktop-download-metadata.mjs";
 
-const FOLDER_NAME = "鹅的笔记安装包";
+const FOLDER_NAME = "Thinkly 安装包";
+const LEGACY_FOLDER_NAME = "鹅的笔记安装包";
 const NOTE_NAME = "说明.txt";
 // 新文件名用于上传；旧文件名只用于识别上一版，全部上传成功后由 retainLatest 删除。
 const INSTALLERS = [
@@ -195,6 +196,22 @@ async function retainLatest(cookie, folderId, version) {
   console.log(`保留版本 ${[...keep].join("、") || version}`);
 }
 
+function isQuarkDirectory(item) {
+  return item?.file === false || item?.dir === true || item?.file_type === 0;
+}
+
+async function openInstallFolder(cookie) {
+  const root = await listChildren(cookie, "0");
+  const next = root.find((item) => item.file_name === FOLDER_NAME && isQuarkDirectory(item));
+  if (next?.fid) return String(next.fid);
+  const legacy = root.find((item) => item.file_name === LEGACY_FOLDER_NAME && isQuarkDirectory(item));
+  if (legacy?.fid) {
+    await renameFile(cookie, String(legacy.fid), FOLDER_NAME);
+    return String(legacy.fid);
+  }
+  return ensureFolder(cookie, FOLDER_NAME);
+}
+
 async function main() {
   const cookie = readCookie();
   await assertCookie(cookie);
@@ -205,7 +222,7 @@ async function main() {
   const names = expectedInstallers(version);
   const missing = names.filter((name) => !present.has(name));
   if (missing.length) throw new QuarkFailure(`缺少安装包：${missing.join("、")}`);
-  const folderId = await ensureFolder(cookie, FOLDER_NAME);
+  const folderId = await openInstallFolder(cookie);
   for (const name of names) await uploadReplacing(cookie, folderId, join(directory, name), name);
   const noteDir = mkdtempSync(join(tmpdir(), "thinkly-quark-"));
   const note = join(noteDir, NOTE_NAME);

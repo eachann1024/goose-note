@@ -13,9 +13,13 @@ cask "thinkly" do
   depends_on :macos
   app "Goose Note.app"
   zap trash: [
+    "~/Library/Application Support/Thinkly",
     "~/Library/Application Support/Goose Note",
+    "~/Library/Logs/Thinkly",
     "~/Library/Logs/Goose Note",
+    "~/Library/Preferences/com.thinkly.desktop.plist",
     "~/Library/Preferences/com.goosenote.desktop.plist",
+    "~/Library/Saved Application State/com.thinkly.desktop.savedState",
     "~/Library/Saved Application State/com.goosenote.desktop.savedState",
   ]
   caveats <<~EOS
