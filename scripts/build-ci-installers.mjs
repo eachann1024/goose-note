@@ -71,24 +71,30 @@ function diskId(devEntry) {
   return /^\/dev\/(disk\d+)/.exec(devEntry || '')?.[1] || '';
 }
 
-function isThinklyMount(mount) {
-  const name = String(mount || '').replace(/^\/Volumes\//, '');
-  return name === 'Thinkly' || /^Thinkly \d+$/.test(name);
+function ownDmgBasename() {
+  const version = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8')).version;
+  const archSuffix = arch === 'arm64' ? '-arm64' : '';
+  return `Thinkly-${version}${archSuffix}.dmg`;
 }
 
 function busyImageDevices(images, output) {
-  const named = new Set([...output.matchAll(/couldn't eject "?(disk\d+)"?/g)].map(match => match[1]));
+  // 只卸载本次 dmgbuild 报错的那块盘。镜像必须是这次产物的临时 DMG，或挂载点正好是 /Volumes/Thinkly。
+  const named = new Set([...output.matchAll(/couldn't eject "?(disk\d+)"?[^\n]*Resource busy/g)].map(match => match[1]));
+  const dmgName = ownDmgBasename();
   const devices = [];
   for (const image of images) {
     if (image['system-image'] === true) continue;
     const entities = Array.isArray(image['system-entities']) ? image['system-entities'] : [];
     const entries = entities
       .map(entity => entity?.['dev-entry'])
-      .filter(entry => typeof entry === 'string' && /^\/dev\/disk\d+/.test(entry) && diskId(entry) !== 'disk0');
-    const mounts = entities.map(entity => entity?.['mount-point']).filter(mount => typeof mount === 'string');
-    const hit = mounts.some(isThinklyMount) || entries.some(entry => named.has(diskId(entry)));
-    if (!hit) continue;
-    devices.push(...entries, ...mounts.filter(isThinklyMount));
+      .filter(entry => typeof entry === 'string' && named.has(diskId(entry)));
+    if (entries.length === 0) continue;
+    const mounts = entities.map(entity => entity?.['mount-point']).filter(mount => typeof mount === 'string' && mount !== '');
+    const imagePath = typeof image['image-path'] === 'string' ? image['image-path'] : '';
+    const ownPath = imagePath.endsWith(dmgName);
+    const ownMount = mounts.length > 0 && mounts.every(mount => mount === '/Volumes/Thinkly');
+    if (!ownPath && !ownMount) continue;
+    devices.push(...entries);
   }
   return [...new Set(devices)].sort((a, b) => a.length - b.length);
 }
@@ -114,7 +120,7 @@ function mountedDiskImages() {
 function detachBusyVolumes(output) {
   const devices = busyImageDevices(mountedDiskImages(), output);
   if (devices.length === 0) {
-    console.error('No leftover Thinkly disk image was still mounted');
+    console.error('No disk image from this build was still mounted');
     return;
   }
   for (const device of devices) {
@@ -178,7 +184,7 @@ function buildMacInstallers(command, env) {
         throw new Error(`macOS DMG build failed after ${MAC_DMG_ATTEMPTS} attempts: ${reason}`);
       }
       console.error(`macOS DMG detach was Resource busy (attempt ${attempt}/${MAC_DMG_ATTEMPTS}): ${busyDetachReason(lastOutput)}`);
-      console.error('Force-detaching leftover volumes and removing partial DMG output before retry');
+      console.error('Force-detaching this build\'s busy disk image and removing partial DMG output before retry');
       detachBusyVolumes(lastOutput);
       removePartialDmg();
       try {
