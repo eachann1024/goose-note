@@ -96,10 +96,16 @@ except OSError:
     raise SystemExit("读不到 Codex 审核输出")
 
 def safe_excerpt(text, n=180):
+    text = text or ""
+    value = r"(?:\"[^\"\n]+\"|'[^'\n]+'|`[^`\n]+`|\S+)"
     text = re.sub(r"-----BEGIN [A-Z0-9 ]+-----.*?-----END [A-Z0-9 ]+-----", "[redacted]", text, flags=re.S)
+    # Authorization: Bearer <token> 里原先只吃掉 Bearer 这个词，后面的凭据会留在摘录里。
+    text = re.sub(r"(?i)\bauthorization\b\s*[:=]?\s*(?:bearer|basic|token|digest)\s+" + value, "[redacted]", text)
+    text = re.sub(r"(?i)\bbearer\s+" + value, "[redacted]", text)
     text = re.sub(r"(?i)\b(sk-|ghp_|github_pat_|xox[baprs]-)[A-Za-z0-9_\-]+", "[redacted]", text)
-    text = re.sub(r"(?i)\b(bearer|token|secret|password|api[_-]?key|authorization)\b\s*[:=]?\s*\S+", r"\1 [redacted]", text)
-    text = re.sub(r"\b[A-Za-z0-9_\-]{32,}\b", "[redacted]", text)
+    text = re.sub(r"\beyJ[A-Za-z0-9_\-]{6,}\.[A-Za-z0-9_\-]{6,}\.[A-Za-z0-9_\-]{6,}", "[redacted]", text)
+    text = re.sub(r"(?i)\b(token|secret|password|api[_-]?key|authorization)\b\s*[:=]\s*" + value, r"\1 [redacted]", text)
+    text = re.sub(r"\b[A-Za-z0-9+/_=-]{32,}\b", "[redacted]", text)
     return " ".join(text.split())[:n]
 
 dec = json.JSONDecoder()
