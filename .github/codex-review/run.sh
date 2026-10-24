@@ -111,7 +111,8 @@ def safe_excerpt(text, n=180):
     text = re.sub(r"(?i)\bbearer\s+" + value, "[redacted]", text)
     text = re.sub(r"(?i)\b(sk-|ghp_|github_pat_|xox[baprs]-)[A-Za-z0-9_\-]+", "[redacted]", text)
     text = re.sub(r"eyJ[A-Za-z0-9_\-=]{8,}(?:\.[A-Za-z0-9_\-=]+)*", "[redacted]", text)
-    text = re.sub(r"(?i)\b(token|secret|password|api[_-]?key|authorization)\b\s*[:=]\s*" + value, r"\1 [redacted]", text)
+    # 分隔符保持可选：password hunter2、token abcdef 这类空格分隔的短凭据也要盖住。
+    text = re.sub(r"(?i)\b(token|secret|password|api[_-]?key|authorization)\b\s*[:=]?\s*" + value, r"\1 [redacted]", text)
     text = re.sub(r"\b[A-Za-z0-9+/_=-]{32,}\b", "[redacted]", text)
     return " ".join(text.split())[:n]
 
